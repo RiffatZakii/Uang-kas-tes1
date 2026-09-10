@@ -225,6 +225,23 @@ renderPayments();
 // -------------------------------------------------------------
 let auth = null;
 let db = null;
+let isFirebaseReady = false;
+
+const defaultFirebaseConfig = {
+	projectId: 'burnished-mantis-g53bd',
+	appId: '1:1043167710020:web:d52bc9da7f924b3239e511',
+	apiKey: 'AIzaSyDZ_bUy0cMAO6sSL84lK3j_zn7TQoD9Z-A',
+	authDomain: 'burnished-mantis-g53bd.firebaseapp.com',
+	firestoreDatabaseId: 'ai-studio-uangkas-4199765b-4c9e-4b10-96b0-048814a9e8da',
+	storageBucket: 'burnished-mantis-g53bd.firebasestorage.app',
+	messagingSenderId: '1043167710020',
+	oAuthClientId: '1043167710020-cmgtdvpj55accuobf15u1812ipmgn54k.apps.googleusercontent.com'
+};
+
+let resolveFirebaseReady;
+const firebaseReadyPromise = new Promise((resolve) => {
+	resolveFirebaseReady = resolve;
+});
 
 function handleFirestoreError(error, operationType, path) {
 	const errInfo = {
@@ -244,24 +261,34 @@ function handleFirestoreError(error, operationType, path) {
 
 async function initFirebase() {
 	try {
-		const configRes = await fetch('/firebase-applet-config.json');
-		if (!configRes.ok) {
-			throw new Error('Gagal memuat konfigurasi Firebase.');
+		let firebaseConfig = defaultFirebaseConfig;
+		try {
+			const configRes = await fetch('./firebase-applet-config.json');
+			if (configRes.ok) {
+				const fetched = await configRes.json();
+				firebaseConfig = { ...defaultFirebaseConfig, ...fetched };
+			}
+		} catch {
+			// Menggunakan default config
 		}
-		const firebaseConfig = await configRes.json();
 
 		const app = initializeApp(firebaseConfig);
 		auth = getAuth(app);
 		db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
-		// Test connection as required
-		try {
-			await getDocFromServer(doc(db, 'students', '1'));
-		} catch (err) {
-			if (err instanceof Error && err.message.includes('the client is offline')) {
-				console.warn('Firestore client dalam mode offline.');
+		isFirebaseReady = true;
+		if (resolveFirebaseReady) resolveFirebaseReady(true);
+
+		// Test connection in background without blocking main UI
+		(async () => {
+			try {
+				await getDocFromServer(doc(db, 'test', 'connection'));
+			} catch (err) {
+				if (err instanceof Error && err.message.includes('the client is offline')) {
+					console.warn('Firestore client dalam mode offline.');
+				}
 			}
-		}
+		})();
 
 		// Handle Auth State
 		onAuthStateChanged(auth, (user) => {
@@ -272,6 +299,8 @@ async function initFirebase() {
 				userName.title = user.email || '';
 			} else {
 				authBtn.style.display = 'block';
+				authBtn.disabled = false;
+				authBtn.textContent = 'Masuk Google';
 				userProfile.style.display = 'none';
 			}
 		});
@@ -317,25 +346,49 @@ async function initFirebase() {
 	} catch (error) {
 		console.error('Error saat inisialisasi Firebase:', error);
 		formMessage.textContent = 'Catatan: Mode offline / lokal aktif.';
+		if (resolveFirebaseReady) resolveFirebaseReady(false);
 	}
 }
 
 // Google Auth Handlers
 authBtn.addEventListener('click', async () => {
+	if (!isFirebaseReady) {
+		formMessage.textContent = 'Menghubungkan ke Firebase...';
+		formMessage.classList.add('success');
+		await Promise.race([
+			firebaseReadyPromise,
+			new Promise((res) => setTimeout(res, 3000))
+		]);
+	}
+
 	if (!auth) {
-		formMessage.textContent = 'Firebase belum siap.';
+		formMessage.textContent = 'Layanan Firebase belum siap. Silakan refresh halaman atau coba sesaat lagi.';
+		formMessage.classList.remove('success');
 		return;
 	}
+
 	try {
-		formMessage.textContent = 'Membuka login Google...';
+		formMessage.textContent = 'Membuka login Google... (jika tidak muncul, periksa pemblokir pop-up)';
 		formMessage.classList.add('success');
 		const provider = new GoogleAuthProvider();
+		provider.setCustomParameters({ prompt: 'select_account' });
 		await signInWithPopup(auth, provider);
 		formMessage.textContent = 'Berhasil masuk dengan Google!';
 		setTimeout(() => { formMessage.textContent = ''; }, 3000);
 	} catch (error) {
 		console.error('Login error:', error);
-		formMessage.textContent = 'Login dibatalkan atau gagal.';
+		const currentHost = window.location.hostname || 'domain web Anda';
+		if (error.code === 'auth/unauthorized-domain') {
+			formMessage.textContent = `Domain "${currentHost}" belum diizinkan di Firebase Console. Buka Firebase Console -> Authentication -> Settings -> Authorized domains, lalu tambahkan "${currentHost}".`;
+		} else if (error.code === 'auth/popup-blocked') {
+			formMessage.textContent = 'Pop-up login diblokir oleh browser. Izinkan pop-up di browser Anda.';
+		} else if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
+			formMessage.textContent = 'Login Google dibatalkan.';
+		} else if (error.code === 'auth/operation-not-allowed') {
+			formMessage.textContent = 'Metode login Google belum diaktifkan di Firebase Console -> Authentication -> Sign-in method.';
+		} else {
+			formMessage.textContent = `Gagal login (${error.code || 'error'}): ${error.message || 'Periksa pengaturan Firebase.'}`;
+		}
 		formMessage.classList.remove('success');
 	}
 });
