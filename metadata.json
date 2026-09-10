@@ -1,0 +1,6 @@
+{
+  "name": "Uang Kas 9D",
+  "description": "Aplikasi pencatatan uang kas kelas 9D untuk mengelola dan memantau pembayaran kas siswa.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

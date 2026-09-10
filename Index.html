@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uang Kas 9D</title>
+    <meta name="description" content="Aplikasi pencatatan uang kas kelas 9D untuk mengelola dan memantau pembayaran kas siswa.">
+    <meta property="og:title" content="Uang Kas 9D">
+    <meta property="og:description" content="Aplikasi pencatatan uang kas kelas 9D untuk mengelola dan memantau pembayaran kas siswa.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="page-shell">
+        <header class="topbar">
+            <div class="brand-mark" aria-hidden="true">9D</div>
+            <div><p class="eyebrow">ADMINISTRASI KELAS</p><h1>Uang Kas 9D</h1></div>
+            <span class="status-pill"><span></span> Semester aktif</span>
+        </header>
+
+        <section class="hero-card">
+            <div>
+                <p class="eyebrow accent">CATATAN MINGGUAN</p>
+                <h2>Kelola kas kelas<br><em>lebih tertata.</em></h2>
+                <p class="hero-copy">Catat pembayaran siswa dengan cepat dan pantau perkembangan kas kelas dalam satu tempat.</p>
+            </div>
+            <div class="hero-shape" aria-hidden="true"><span class="coin coin-one">Rp</span><span class="coin coin-two">✓</span><span class="hero-orbit"></span></div>
+        </section>
+
+        <section class="summary-grid" aria-label="Ringkasan uang kas">
+            <article class="summary-card"><div class="card-icon blue">Rp</div><p>Total kas siswa</p><strong id="totalCash">Rp 0</strong><small id="transactionStatus">Pilih siswa untuk melihat saldo</small></article>
+            <article class="summary-card"><div class="card-icon green">✓</div><p>Siswa terpilih</p><strong id="selectedStudentName">Belum dipilih</strong><small id="paidCount">Dari 24 siswa</small></article>
+            <article class="summary-card highlight"><div class="card-icon yellow">01</div><p>Minggu siswa</p><strong id="selectedWeek">Minggu 0</strong><small>Naik setiap Rp10.000</small></article>
+        </section>
+
+        <section class="entry-panel">
+            <div class="section-heading"><div><p class="eyebrow accent">TRANSAKSI BARU</p><h2>Tambah pembayaran</h2></div><span class="entry-number">01</span></div>
+            <div class="entry-form">
+                <div class="form-fields">
+                    <div><label for="studentSelect">Pilih siswa</label><select id="studentSelect"><option value="">Pilih salah satu siswa</option></select></div>
+                    <div><label for="amountInput">Nominal pembayaran</label><div class="amount-field"><span>Rp</span><input type="number" id="amountInput" min="1" step="1000" placeholder="0" inputmode="numeric"></div></div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="btn">Tambah pembayaran <span aria-hidden="true">+</span></button>
+                    <button type="button" id="decreaseBtn" class="decrease-button">Kurangi pembayaran <span aria-hidden="true">−</span></button>
+                </div>
+                <p class="form-message" id="formMessage" role="status"></p>
+            </div>
+        </section>
+        <section class="payment-list-panel">
+            <div class="list-heading"><div><p class="eyebrow accent">REKAP SISWA</p><h2>Riwayat pembayaran</h2></div><span id="listCount">0 siswa</span></div>
+            <div class="payment-list" id="paymentList"><p class="empty-state">Pilih siswa untuk melihat rekap kas.</p></div>
+        </section>
+        <footer>UANG KAS 9D <span>•</span> Dibuat untuk pencatatan kelas yang lebih mudah</footer>
+    </main>
+    <script type="module" src="Index.js"></script>
+</body>
+</html>
