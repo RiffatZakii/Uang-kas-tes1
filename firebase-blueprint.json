@@ -1,0 +1,134 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Student record in class 9D including savings balance and week progression",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Student roster number (1-24)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Student display name",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Total accumulated cash balance in Rupiah"
+        },
+        "week": {
+          "type": "integer",
+          "description": "Completed payment week milestones"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last update"
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "UID of the user who last updated this record"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "amount",
+        "week",
+        "updatedAt",
+        "updatedBy"
+      ]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "Individual payment or deduction ledger record",
+      "type": "object",
+      "properties": {
+        "studentId": {
+          "type": "integer",
+          "description": "ID of the target student"
+        },
+        "studentName": {
+          "type": "string",
+          "description": "Name of the target student",
+          "maxLength": 100
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Nominal amount added or deducted in Rupiah"
+        },
+        "changeType": {
+          "type": "string",
+          "enum": [
+            "ADD",
+            "DECREASE"
+          ],
+          "description": "Whether cash was added or deducted"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the payment transaction was logged"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "UID of the user who recorded this payment"
+        }
+      },
+      "required": [
+        "studentId",
+        "studentName",
+        "amount",
+        "changeType",
+        "createdAt",
+        "createdBy"
+      ]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized class treasurers and administrators",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Email address of the administrator"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "admin",
+            "treasurer"
+          ],
+          "description": "Administrative role level"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when admin status was granted"
+        }
+      },
+      "required": [
+        "email",
+        "role",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Collection of student balances and weekly tracking in Class 9D"
+    },
+    "/payments/{paymentId}": {
+      "schema": "Payment",
+      "description": "Ledger of all payment additions and deductions"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Registry of authorized admin and treasurer accounts"
+    }
+  }
+}

@@ -17,7 +17,14 @@
         <header class="topbar">
             <div class="brand-mark" aria-hidden="true">9D</div>
             <div><p class="eyebrow">ADMINISTRASI KELAS</p><h1>Uang Kas 9D</h1></div>
-            <span class="status-pill"><span></span> Semester aktif</span>
+            <div class="topbar-actions">
+                <span class="status-pill"><span></span> Cloud Firestore</span>
+                <button type="button" id="authBtn" class="auth-btn">Masuk Google</button>
+                <div id="userProfile" class="user-profile" style="display: none;">
+                    <span id="userName" class="user-name">Pengguna</span>
+                    <button type="button" id="logoutBtn" class="logout-btn" title="Keluar">Keluar</button>
+                </div>
+            </div>
         </header>
 
         <section class="hero-card">
@@ -50,8 +57,15 @@
             </div>
         </section>
         <section class="payment-list-panel">
-            <div class="list-heading"><div><p class="eyebrow accent">REKAP SISWA</p><h2>Riwayat pembayaran</h2></div><span id="listCount">0 siswa</span></div>
-            <div class="payment-list" id="paymentList"><p class="empty-state">Pilih siswa untuk melihat rekap kas.</p></div>
+            <div class="list-heading">
+                <div><p class="eyebrow accent">DATA & RIWAYAT KAS</p><h2 id="panelHeading">Rekap Kas Siswa</h2></div>
+                <div class="panel-switch">
+                    <button type="button" id="tabStudents" class="tab-btn active">Daftar Siswa (<span id="listCount">24</span>)</button>
+                    <button type="button" id="tabTransactions" class="tab-btn">Riwayat Pembayaran</button>
+                </div>
+            </div>
+            <div class="payment-list" id="paymentList"><p class="empty-state">Memuat data dari Firestore...</p></div>
+            <div class="transaction-list" id="transactionList" style="display: none;"><p class="empty-state">Belum ada riwayat transaksi pembayaran tercatat di Firestore.</p></div>
         </section>
         <footer>UANG KAS 9D <span>•</span> Dibuat untuk pencatatan kelas yang lebih mudah</footer>
     </main>

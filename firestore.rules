@@ -1,0 +1,111 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global Safety Net: Default Deny All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common Validation Primitives
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isSuperAdminEmail() {
+      return isVerifiedUser() && request.auth.token.email == 'riffatzaki201@gmail.com';
+    }
+
+    function isAdmin() {
+      return isSuperAdminEmail() || (isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    // Entity Validation Helpers
+    function isValidStudent(data) {
+      return data.keys().hasAll(['id', 'name', 'amount', 'week', 'updatedAt', 'updatedBy']) &&
+             data.keys().size() == 6 &&
+             data.id is int && data.id >= 1 && data.id <= 24 &&
+             data.name is string && data.name.size() >= 2 && data.name.size() <= 100 &&
+             data.amount is int && data.amount >= 0 && data.amount <= 100000000 &&
+             data.week is int && data.week >= 0 &&
+             data.week * 10000 <= data.amount && (data.week + 1) * 10000 > data.amount &&
+             data.updatedAt is timestamp &&
+             data.updatedBy is string && data.updatedBy.size() <= 128;
+    }
+
+    function isValidPayment(data) {
+      return data.keys().hasAll(['studentId', 'studentName', 'amount', 'changeType', 'createdAt', 'createdBy']) &&
+             data.keys().size() == 6 &&
+             data.studentId is int && data.studentId >= 1 && data.studentId <= 24 &&
+             data.studentName is string && data.studentName.size() >= 2 && data.studentName.size() <= 100 &&
+             data.amount is int && data.amount > 0 && data.amount <= 100000000 &&
+             data.changeType in ['ADD', 'DECREASE'] &&
+             data.createdAt is timestamp &&
+             data.createdBy is string && data.createdBy.size() <= 128;
+    }
+
+    function isValidAdmin(data) {
+      return data.keys().hasAll(['email', 'role', 'createdAt']) &&
+             data.keys().size() == 3 &&
+             data.email is string && data.email.size() <= 150 &&
+             data.role in ['admin', 'treasurer'] &&
+             data.createdAt is timestamp;
+    }
+
+    // Students Collection: Public view for class members, verified users can update balances
+    match /students/{studentId} {
+      allow get, list: if true;
+      allow create: if (isAdmin() || isVerifiedUser()) &&
+                       isValidId(studentId) &&
+                       isValidStudent(incoming()) &&
+                       incoming().updatedAt == request.time &&
+                       incoming().updatedBy == request.auth.uid;
+      allow update: if (isAdmin() || isVerifiedUser()) &&
+                       isValidId(studentId) &&
+                       isValidStudent(incoming()) &&
+                       incoming().updatedAt == request.time &&
+                       incoming().updatedBy == request.auth.uid &&
+                       incoming().id == existing().id &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['amount', 'week', 'updatedAt', 'updatedBy']);
+      allow delete: if isAdmin() && isValidId(studentId);
+    }
+
+    // Payments Collection (Immutable Ledger): Public read, verified users can record payments
+    match /payments/{paymentId} {
+      allow get, list: if true;
+      allow create: if (isAdmin() || isVerifiedUser()) &&
+                       isValidId(paymentId) &&
+                       isValidPayment(incoming()) &&
+                       incoming().createdAt == request.time &&
+                       incoming().createdBy == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Admins Collection
+    match /admins/{adminId} {
+      allow get, list: if isSignedIn();
+      allow create, update: if isAdmin() &&
+                               isValidId(adminId) &&
+                               isValidAdmin(incoming()) &&
+                               incoming().createdAt == request.time;
+      allow delete: if isAdmin() && isValidId(adminId);
+    }
+  }
+}
