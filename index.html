@@ -19,35 +19,62 @@
             <div><p class="eyebrow">ADMINISTRASI KELAS</p><h1>Uang Kas 9D</h1></div>
             <div class="topbar-actions">
                 <span class="status-pill"><span></span> Cloud Firestore</span>
-                <button type="button" id="authBtn" class="auth-btn">Masuk Google</button>
+                <span id="roleBadge" class="role-badge viewer">Mode Tamu (Hanya Lihat)</span>
+                <button type="button" id="authBtn" class="auth-btn">Masuk Otoritas 🔑</button>
                 <div id="userProfile" class="user-profile" style="display: none;">
-                    <span id="userName" class="user-name">Pengguna</span>
-                    <button type="button" id="logoutBtn" class="logout-btn" title="Keluar">Keluar</button>
+                    <span id="userName" class="user-name">👑 Owner (Riffat Zaki)</span>
+                    <button type="button" id="logoutBtn" class="logout-btn" title="Kunci Akses">Kunci 🔒</button>
                 </div>
             </div>
         </header>
 
         <section class="hero-card">
             <div>
-                <p class="eyebrow accent">CATATAN MINGGUAN</p>
+                <p class="eyebrow accent">DIBUAT OLEH RIFFAT ZAKI ARRABANI</p>
                 <h2>Kelola kas kelas<br><em>lebih tertata.</em></h2>
                 <p class="hero-copy">Catat pembayaran siswa dengan cepat dan pantau perkembangan kas kelas dalam satu tempat.</p>
             </div>
             <div class="hero-shape" aria-hidden="true"><span class="coin coin-one">Rp</span><span class="coin coin-two">✓</span><span class="hero-orbit"></span></div>
         </section>
 
-        <section class="summary-grid" aria-label="Ringkasan uang kas">
-            <article class="summary-card"><div class="card-icon blue">Rp</div><p>Total kas siswa</p><strong id="totalCash">Rp 0</strong><small id="transactionStatus">Pilih siswa untuk melihat saldo</small></article>
-            <article class="summary-card"><div class="card-icon green">✓</div><p>Siswa terpilih</p><strong id="selectedStudentName">Belum dipilih</strong><small id="paidCount">Dari 24 siswa</small></article>
-            <article class="summary-card highlight"><div class="card-icon yellow">01</div><p>Minggu siswa</p><strong id="selectedWeek">Minggu 0</strong><small>Naik setiap Rp10.000</small></article>
+        <section class="summary-grid with-expense" aria-label="Ringkasan uang kas">
+            <article class="summary-card"><div class="card-icon blue">Rp</div><p>Total kas masuk</p><strong id="totalCash">Rp 0</strong><small id="transactionStatus">Pilih siswa untuk melihat saldo</small></article>
+            <article class="summary-card"><div class="card-icon red">📉</div><p>Total pengeluaran</p><strong id="totalExpenses">Rp 0</strong><small id="expenseCount">0 pengeluaran tercatat</small></article>
+            <article class="summary-card highlight"><div class="card-icon green">💰</div><p>Sisa saldo kas</p><strong id="netBalance">Rp 0</strong><small>Kas masuk - pengeluaran</small></article>
+            <article class="summary-card"><div class="card-icon yellow">01</div><p>Siswa terpilih</p><strong id="selectedStudentName">Belum dipilih</strong><small><span id="selectedWeek">Minggu 0</span> • <span id="paidCount">Dari 24 siswa</span></small></article>
         </section>
 
         <section class="entry-panel">
-            <div class="section-heading"><div><p class="eyebrow accent">TRANSAKSI BARU</p><h2>Tambah pembayaran</h2></div><span class="entry-number">01</span></div>
-            <div class="entry-form">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow accent">TRANSAKSI KAS</p>
+                    <h2>Tambah pembayaran</h2>
+                </div>
+                <span class="entry-number">01</span>
+            </div>
+
+            <div id="permissionBanner" class="permission-banner viewer">
+                <div class="banner-icon" id="bannerIcon" aria-hidden="true">🔒</div>
+                <div class="banner-text">
+                    <strong id="permissionTitle">Mode Tamu (Hanya Lihat)</strong>
+                    <p id="permissionDesc">Formulir pembayaran terkunci untuk pengunjung. Masukkan kata sandi Editor atau Owner untuk menginput pembayaran kas.</p>
+                </div>
+                <button type="button" id="bannerLoginBtn" class="banner-login-btn">Masuk Otoritas 🔑</button>
+            </div>
+
+            <div class="entry-form" id="entryForm">
                 <div class="form-fields">
-                    <div><label for="studentSelect">Pilih siswa</label><select id="studentSelect"><option value="">Pilih salah satu siswa</option></select></div>
-                    <div><label for="amountInput">Nominal pembayaran</label><div class="amount-field"><span>Rp</span><input type="number" id="amountInput" min="1" step="1000" placeholder="0" inputmode="numeric"></div></div>
+                    <div>
+                        <label for="studentSelect">Pilih siswa</label>
+                        <select id="studentSelect"><option value="">Pilih salah satu siswa</option></select>
+                    </div>
+                    <div>
+                        <label for="amountInput">Nominal pembayaran</label>
+                        <div class="amount-field">
+                            <span>Rp</span>
+                            <input type="number" id="amountInput" min="1" step="1000" placeholder="0" inputmode="numeric">
+                        </div>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="button" id="btn">Tambah pembayaran <span aria-hidden="true">+</span></button>
@@ -56,19 +83,202 @@
                 <p class="form-message" id="formMessage" role="status"></p>
             </div>
         </section>
+
+        <section class="editors-panel" id="editorsPanel">
+            <div class="list-heading">
+                <div>
+                    <p class="eyebrow accent">SISTEM OTORITAS</p>
+                    <h2>Tingkat Hak Akses Kas</h2>
+                </div>
+                <span id="authorityStatusBadge" class="editor-badge-count">Mode Tamu</span>
+            </div>
+            <div class="editors-content">
+                <p class="editors-desc">Pengelolaan uang kas kelas 9D dilindungi dengan sistem kata sandi 2 level hak akses untuk menjamin keamanan kas.</p>
+                
+                <div class="authority-cards">
+                    <div class="authority-card" id="cardOwner">
+                        <div class="authority-header">
+                            <div class="authority-title">
+                                <span class="authority-glyph">👑</span>
+                                <strong>Otoritas Owner</strong>
+                            </div>
+                            <span class="authority-status locked" id="ownerStatusTag">Terkunci</span>
+                        </div>
+                        <div class="authority-holder">Riffat Zaki Arrabani (Pembuat & Admin)</div>
+                        <p class="authority-desc">Kontrol penuh transaksi kas, riwayat pembayaran, serta hak mengubah kata sandi Editor dan Owner.</p>
+                    </div>
+
+                    <div class="authority-card" id="cardEditor">
+                        <div class="authority-header">
+                            <div class="authority-title">
+                                <span class="authority-glyph">✏️</span>
+                                <strong>Otoritas Editor</strong>
+                            </div>
+                            <span class="authority-status locked" id="editorStatusTag">Terkunci</span>
+                        </div>
+                        <div class="authority-holder">Bendahara & Petugas Kas 9D</div>
+                        <p class="authority-desc">Hak akses untuk menambah atau mengurangi catatan setoran kas siswa kelas 9D.</p>
+                    </div>
+                </div>
+
+                <!-- Special Owner Management Box (Visible when Owner is unlocked) -->
+                <div id="ownerSettingsBox" class="owner-settings-box" style="display: none;">
+                    <h3>⚙️ Pengaturan Kata Sandi (Khusus Owner)</h3>
+                    <p class="settings-desc">Sebagai Owner (Riffat Zaki), Anda dapat memperbarui kata sandi sistem kapan saja. Data disinkronkan secara aman ke Cloud Firestore.</p>
+                    <div class="settings-grid">
+                        <div class="setting-card">
+                            <label for="changeEditorPwdInput">Kata Sandi Editor Baru:</label>
+                            <div class="pwd-change-row">
+                                <input type="password" id="changeEditorPwdInput" placeholder="Password editor baru...">
+                                <button type="button" id="saveEditorPwdBtn">Simpan</button>
+                            </div>
+                            <small class="pwd-current-hint">Status: <strong id="currentEditorPwdDisplay">Tersimpan aman (••••••)</strong></small>
+                        </div>
+                        <div class="setting-card">
+                            <label for="changeOwnerPwdInput">Kata Sandi Owner Baru:</label>
+                            <div class="pwd-change-row">
+                                <input type="password" id="changeOwnerPwdInput" placeholder="Password owner baru...">
+                                <button type="button" id="saveOwnerPwdBtn">Simpan</button>
+                            </div>
+                            <small class="pwd-current-hint">Status: <strong id="currentOwnerPwdDisplay">Tersimpan aman (••••••)</strong></small>
+                        </div>
+                    </div>
+                    <p id="ownerSettingMessage" class="form-message" role="status"></p>
+                </div>
+            </div>
+        </section>
+
         <section class="payment-list-panel">
             <div class="list-heading">
                 <div><p class="eyebrow accent">DATA & RIWAYAT KAS</p><h2 id="panelHeading">Rekap Kas Siswa</h2></div>
-                <div class="panel-switch">
-                    <button type="button" id="tabStudents" class="tab-btn active">Daftar Siswa (<span id="listCount">24</span>)</button>
-                    <button type="button" id="tabTransactions" class="tab-btn">Riwayat Pembayaran</button>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <div class="panel-switch">
+                        <button type="button" id="tabStudents" class="tab-btn active">Daftar Siswa (<span id="listCount">24</span>)</button>
+                        <button type="button" id="tabTransactions" class="tab-btn">Riwayat Pembayaran</button>
+                        <button type="button" id="tabExpenses" class="tab-btn">Pengeluaran Kas (<span id="tabExpenseCount">0</span>)</button>
+                    </div>
+                    <button type="button" id="openExpenseModalBtn" class="open-expense-btn" title="Catat pengeluaran baru kelas 9D">
+                        <span>+ Catat Pengeluaran</span>
+                    </button>
                 </div>
             </div>
             <div class="payment-list" id="paymentList"><p class="empty-state">Memuat data dari Firestore...</p></div>
             <div class="transaction-list" id="transactionList" style="display: none;"><p class="empty-state">Belum ada riwayat transaksi pembayaran tercatat di Firestore.</p></div>
+            <div class="transaction-list" id="expenseList" style="display: none;"><p class="empty-state">Belum ada catatan pengeluaran kas tercatat di Firestore.</p></div>
         </section>
+
+        <!-- Modal Dialog for Adding Expense -->
+        <div id="expenseModal" class="modal-backdrop" style="display: none;">
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="expenseModalTitle">
+                <div class="modal-header">
+                    <div class="modal-brand">
+                        <span class="modal-icon" style="background: #fee2e2; color: #b83c3c;" aria-hidden="true">📉</span>
+                        <div>
+                            <h3 id="expenseModalTitle">Catat Pengeluaran Kas</h3>
+                            <p>Pengeluaran untuk keperluan dan kegiatan kelas 9D</p>
+                        </div>
+                    </div>
+                    <button type="button" id="closeExpenseModalBtn" class="modal-close-btn" aria-label="Tutup">&times;</button>
+                </div>
+                <form id="expenseForm" class="modal-form">
+                    <div style="margin-bottom: 14px;">
+                        <label for="expenseTitleInput" style="display: block; margin-bottom: 7px; font-size: .78rem; font-weight: 700; color: var(--ink);">Keperluan / Keterangan</label>
+                        <input type="text" id="expenseTitleInput" placeholder="Contoh: Beli spidol & penghapus papan tulis" required minlength="2" maxlength="150">
+                    </div>
+                    <div style="margin-bottom: 14px;">
+                        <label for="expenseAmountInput" style="display: block; margin-bottom: 7px; font-size: .78rem; font-weight: 700; color: var(--ink);">Nominal Pengeluaran</label>
+                        <div class="amount-field">
+                            <span>Rp</span>
+                            <input type="number" id="expenseAmountInput" min="500" step="500" placeholder="0" inputmode="numeric" required>
+                        </div>
+                    </div>
+                    <p id="expenseModalError" class="modal-error-msg" role="status"></p>
+                    <div class="modal-actions">
+                        <button type="button" id="cancelExpenseModalBtn" class="cancel-btn">Batal</button>
+                        <button type="submit" id="submitExpenseBtn" class="submit-pwd-btn submit-expense-btn">Simpan Pengeluaran 📉</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Dialog for Password Entry -->
+        <div id="passwordModal" class="modal-backdrop" style="display: none;">
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+                <div class="modal-header">
+                    <div class="modal-brand">
+                        <span class="modal-icon" aria-hidden="true">🔐</span>
+                        <div>
+                            <h3 id="modalTitle">Aktivasi Otoritas Kas</h3>
+                            <p>Masukkan kata sandi sesuai hak akses Anda</p>
+                        </div>
+                    </div>
+                    <button type="button" id="closeModalBtn" class="modal-close-btn" aria-label="Tutup">&times;</button>
+                </div>
+                <form id="passwordForm" class="modal-form">
+                    <div class="role-selector">
+                        <label class="role-option selected" id="roleOptionEditor">
+                            <input type="radio" name="authRole" value="editor" checked>
+                            <div class="role-content">
+                                <div class="role-title">
+                                    <span class="role-glyph">✏️</span>
+                                    <strong>Editor</strong>
+                                </div>
+                                <small>Petugas / Bendahara</small>
+                            </div>
+                        </label>
+                        <label class="role-option" id="roleOptionOwner">
+                            <input type="radio" name="authRole" value="owner">
+                            <div class="role-content">
+                                <div class="role-title">
+                                    <span class="role-glyph">👑</span>
+                                    <strong>Owner</strong>
+                                </div>
+                                <small>Riffat Zaki (Admin)</small>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="password-field-wrap">
+                        <label for="passwordInput">Kata Sandi Akses</label>
+                        <div class="password-input-row">
+                            <input type="password" id="passwordInput" placeholder="Ketik kata sandi..." autocomplete="current-password" required>
+                            <button type="button" id="togglePasswordVisibility" class="toggle-pwd-btn" title="Tampilkan kata sandi">👁️</button>
+                        </div>
+                    </div>
+                    <p id="modalErrorMessage" class="modal-error-msg" role="status"></p>
+                    <div class="modal-actions">
+                        <button type="button" id="cancelModalBtn" class="cancel-btn">Batal</button>
+                        <button type="submit" id="submitPasswordBtn" class="submit-pwd-btn">Buka Akses 🔓</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Custom In-App Modal Dialog for Confirming Delete -->
+        <div id="deleteConfirmModal" class="modal-backdrop" style="display: none;">
+            <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" style="max-width: 420px;">
+                <div class="modal-header">
+                    <div class="modal-brand">
+                        <span class="modal-icon" style="background: #fee2e2; color: #b83c3c;" aria-hidden="true">🗑️</span>
+                        <div>
+                            <h3 id="deleteModalTitle">Hapus Pengeluaran?</h3>
+                            <p>Tindakan ini akan mengembalikan saldo kas</p>
+                        </div>
+                    </div>
+                    <button type="button" id="closeDeleteModalBtn" class="modal-close-btn" aria-label="Tutup">&times;</button>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <p id="deleteModalDesc" style="font-size: .88rem; color: var(--ink); line-height: 1.5; margin: 0;">Apakah Anda yakin ingin menghapus catatan pengeluaran ini?</p>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelDeleteBtn" class="cancel-btn">Batal</button>
+                    <button type="button" id="confirmDeleteBtn" class="submit-pwd-btn submit-expense-btn" style="background: #c64b4b;">Hapus Catatan 🗑️</button>
+                </div>
+            </div>
+        </div>
+
         <footer>UANG KAS 9D <span>•</span> Dibuat untuk pencatatan kelas yang lebih mudah</footer>
     </main>
     <script type="module" src="Index.js"></script>
 </body>
 </html>
+

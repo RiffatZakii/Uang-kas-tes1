@@ -115,6 +115,77 @@
         "role",
         "createdAt"
       ]
+    },
+    "Editor": {
+      "title": "Editor",
+      "description": "Selected authorized email accounts with edit access for class funds",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Authorized editor email address"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "admin",
+            "editor",
+            "treasurer"
+          ],
+          "description": "Assigned editor role"
+        },
+        "addedBy": {
+          "type": "string",
+          "description": "Email of admin who authorized this editor"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when authorization was granted"
+        }
+      },
+      "required": [
+        "email",
+        "role",
+        "addedBy",
+        "createdAt"
+      ]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Class expense / disbursement record for 9D activities and equipment",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Purpose or description of the expense",
+          "minLength": 2,
+          "maxLength": 150
+        },
+        "amount": {
+          "type": "integer",
+          "description": "Expense nominal amount in Rupiah"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of expense (e.g. Alat & ATK, Kegiatan Kelas, Fotokopi & Print, Konsumsi, Sosial / Jenguk, Lain-lain)"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when expense was recorded"
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Authority who recorded the expense"
+        }
+      },
+      "required": [
+        "title",
+        "amount",
+        "createdAt",
+        "createdBy"
+      ]
     }
   },
   "firestore": {
@@ -126,9 +197,17 @@
       "schema": "Payment",
       "description": "Ledger of all payment additions and deductions"
     },
+    "/expenses/{expenseId}": {
+      "schema": "Expense",
+      "description": "Collection of class fund disbursements and expenses"
+    },
     "/admins/{adminId}": {
       "schema": "Admin",
       "description": "Registry of authorized admin and treasurer accounts"
+    },
+    "/editors/{editorId}": {
+      "schema": "Editor",
+      "description": "Registry of authorized email accounts with edit permissions"
     }
   }
 }
